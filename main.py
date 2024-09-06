@@ -1,10 +1,28 @@
-import os
-import sys
-import socket
-from pystyle import Colors, Cursor, System, Anime, Center, Colorate
 
+try:
+    import os
+    import sys
+    import socket
+    import time
+    import base64
+    from pystyle import Colors, Cursor, System, Anime, Center, Colorate
+    from rich.console import Console
+except ModuleNotFoundError:
+    os.system('pip install os')
+    os.system('pip install sys')
+    os.system('pip install socket')
+    os.system('pip install time')
+    os.system('pip install base64')
+    os.system('pip install pystyle')
+    os.system('pip install rich.console')
+
+
+console = Console()
+
+# Append the path to the utils directory where your utility modules are located.
 sys.path.append(os.path.join(os.path.dirname(__file__), 'utils'))
 
+# Import utility modules
 from ip_info import get_ip_info
 from get_ip import main as get_ip_main
 from token_decrypt import decrypt_token
@@ -23,56 +41,48 @@ from auto_login import main as auto_login_main
 from token_generator import main as token_generator_main 
 from website_info import main as website_info_main
 from token_massdm import execute_mass_dm
+from email_tracker import track_emails
+from discord_bot_server_nuker import nuke_server
 
-from ToolBuilder import interfaces
+# Function to setup system properties like window size and title
+def setup():
+    System.Size(120, 30)
+    System.Title("FlexiTool - Advanced Python Utility by @kazzou")
+    Cursor.HideCursor()
 
-class colors:
-    red = '[38;2;255;0;0m'
-    orange = '[38;2;255;165;0m'
-    green = '[38;2;100;255;100m'
-    black = '[38;2;0;0;0m'
-    pink = '[38;2;255;0;255m'
-    purple = '[38;2;113;41;255m'
-    blue = '[38;2;92;120;255m'
-    white = '[38;2;255;255;255m'
-    gray = '[38;2;200;200;200m'
-    light_gray = '[38;2;150;150;150m'
+# Intro animation using pystyle
+def launch_animation():
+    intro_text = '''
+                                                                                                  
+              █████▒██▓    ▓█████ ▒██   ██▒ ██▓      ▄▄▄█████▓ ▒█████   ▒█████   ██▓    
+            ▓██   ▒▓██▒    ▓█   ▀ ▒▒ █ █ ▒░▓██▒      ▓  ██▒ ▓▒▒██▒  ██▒▒██▒  ██▒▓██▒    
+            ▒████ ░▒██░    ▒███   ░░  █   ░▒██▒      ▒ ▓██░ ▒░▒██░  ██▒▒██░  ██▒▒██░    
+            ░▓█▒  ░▒██░    ▒▓█  ▄  ░ █ █ ▒ ░██░      ░ ▓██▓ ░ ▒██   ██░▒██   ██░▒██░    
+            ░▒█░   ░██████▒░▒████▒▒██▒ ▒██▒░██░        ▒██▒ ░ ░ ████▓▒░░ ████▓▒░░██████▒
+             ▒ ░   ░ ▒░▓  ░░░ ▒░ ░▒▒ ░ ░▓ ░░▓          ▒ ░░   ░ ▒░▒░▒░ ░ ▒░▒░▒░ ░ ▒░▓  ░
+             ░     ░ ░ ▒  ░ ░ ░  ░░░   ░▒ ░ ▒ ░          ░      ░ ▒ ▒░   ░ ▒ ▒░ ░ ░ ▒  ░
+             ░ ░     ░ ░      ░    ░    ░   ▒ ░        ░      ░ ░ ░ ▒  ░ ░ ░ ▒    ░ ░   
+                       ░  ░   ░  ░ ░    ░   ░                     ░ ░      ░ ░      ░  ░
+                                                                             
+                                                                                                   
+                                    Press ENTER to start the tool...                                                                
+    '''
+    Anime.Fade(Center.Center(intro_text), Colors.rainbow, Colorate.Vertical, interval=0.05, enter=True)
 
-watermark = '''
-___________.__                ._____________           .__   
-\_   _____/|  |   ____ ___  __|__\__    ___/___   ____ |  |  
- |    __)  |  | _/ __ \\  \/  /  | |    | /  _ \ /  _ \|  |  
- |     \   |  |_\  ___/ >    <|  | |    |(  <_> |  <_> )  |__
- \___  /   |____/\___  >__/\_ \__| |____| \____/ \____/|____/
-     \/              \/      \/                               
-                               |_|                          
-                    Press ENTER to continue  
-                            '''
+# Clear screen function
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-Cursor.HideCursor()
-System.Title('Press ENTER to continue')
-Anime.Fade(Center.Center(watermark), Colors.cyan_to_blue, Colorate.Vertical, interval=0.100, enter=True)
-
-Cursor.ShowCursor()
-System.Title('FlexiTool by @kazzou')
-
-print(watermark
-      .replace('█', colors.purple + '█')
-      .replace('╗', colors.blue + '╗')
-      .replace('║', colors.blue + '║')
-      .replace('╝', colors.blue + '╝')
-      .replace('═', colors.blue + '═')
-      .replace('╔', colors.blue + '╔')
-      + '\n' + colors.white)
-
+# Function to get the computer's name
 def get_pc_name():
-    """Retourne le nom de l'ordinateur"""
     return socket.gethostname()
 
+# Stylized prompt for user input
 def prompt_input(prompt_message):
     pc_name = get_pc_name()
-    return input(f"╭─── {pc_name}@FlexiTool\n│\n╰─$ {prompt_message}")
+    return input(f"{Colors.green}╭─── {pc_name}@FlexiTool\n{Colors.gray}│\n{Colors.green}╰─$ {prompt_message}{Colors.white}")
 
+# Function to display IP info
 def ip_info():
     ip = prompt_input("Enter IP address: ")
     print(f"Fetching information for IP: {ip}...")
@@ -88,121 +98,227 @@ def ip_info():
         print(f"Timezone: {data.get('timezone')}")
     else:
         print("No information found.")
-
+    input("\nPress Enter to return to the menu...")
+        
+# Function to decrypt a Discord token
 def token_decrypt():
-    import base64
-    from pystyle import Colors
-    
-    clear()
+    clear_screen()
     userid = prompt_input("Enter Discord ID: ")
     encoded_bytes = base64.b64encode(userid.encode("utf-8"))
     encoded_str = str(encoded_bytes, "utf-8")
-    print(f'\nFIRST PART : {encoded_str}')
+    print(f'\nFIRST PART: {encoded_str}')
+    input("\nPress Enter to return to the menu...")
+    
 
-def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')
-
+# Function to display Discord token info
 def token_info():
-    clear()
+    clear_screen()
     try:
         print("Token Info Fetcher")
         token_discord = prompt_input("Enter Discord token: ")
         display_discord_info(token_discord)
-        clear()
+        clear_screen()
     except Exception as e:
         print(f"Error: {e}")
+    input("\nPress Enter to return to the menu...")
+        
 
+# Function to change Discord badges
 def badge_changer():
-    clear()
+    clear_screen()
     badge_changer_main()
+    input("\nPress Enter to return to the menu...")
+    
 
+# Function to rotate Discord statuses
 def status_rotator():
-    clear()
+    clear_screen()
     status_changer()
+    input("\nPress Enter to return to the menu...")
+    
 
+# Function to lookup server info
 def server_info():
-    clear()
+    clear_screen()
     server_lookup()
+    input("\nPress Enter to return to the menu...")
+    
 
+# Function to get webhook info
 def webhook_info():
-    clear()
+    clear_screen()
     webhook_url = prompt_input("Enter Webhook URL: ")
     info_webhook(webhook_url)
+    input("\nPress Enter to return to the menu...")
 
+# Function to spam a webhook
 def webhook_spammer():
-    clear()
-    webhookspam() 
+    clear_screen()
+    webhookspam()
+    input("\nPress Enter to return to the menu...")
 
+# Function to scrape proxies
 def scrapper_proxy():
-    clear()
+    clear_screen()
     print("Starting proxy scrapper...")
     get_proxies()
     print("Proxies have been scraped and saved to proxies.txt.")
     input("\nPress Enter to return to the menu...")
 
+# Function to get email info
 def email_info():
-    clear()
+    clear_screen()
     email_info_main()  
     input("\nPress Enter to return to the menu...")
 
+# Function to get Instagram user info
 def instagram_user_info():
-    clear()
+    clear_screen()
     instagram_user_info_main()
     input("\nPress Enter to return to the menu...")
 
+# Function to get phone number info
 def number_info():
-    clear()
+    clear_screen()
     number_info_main()  
     input("\nPress Enter to return to the menu...")
 
+# Function for auto-login
 def auto_login():
-    clear()
+    clear_screen()
     auto_login_main()  
     input("\nPress Enter to return to the menu...")
 
+# Function to generate tokens
 def token_generator():
-    clear()
+    clear_screen()
     token_generator_main()  
     input("\nPress Enter to return to the menu...")
 
+# Function to get website info
 def website_info():
-    clear()
+    clear_screen()
     website_info_main()  
     input("\nPress Enter to return to the menu...")
 
-ui = interfaces.AnySearch(
-    title='FlexiTool',
-    subtitles=[
-        'Développé par @kazzou',
-        'Version: 1.0.0'
-    ],
-    color=colors.green
-)
+# Function to send mass DM with token
+def execute_mass_dm():
+    clear_screen()
+    # Assuming the execute_mass_dm function is correctly implemented in token_massdm module
+    token = prompt_input("Enter token: ")
+    message = prompt_input("Enter the message to send: ")
+    execute_mass_dm(token, message)
+    input("\nPress Enter to return to the menu...")
+#1.1 VERSION NEW COMMANDS :    
+def email_tracker():
+    clear_screen()
+    track_emails()
+    input("\nPress Enter to return to the menu...")
 
-ui.add_field('IP Info', ip_info)
-ui.add_field('Get IP', get_ip_main)
-ui.add_field('Token Decrypt', token_decrypt)
-ui.add_field('Token Checker', token_checker_main)
-ui.add_field('Token Info', token_info)
-ui.add_field('Badge Changer', badge_changer)
-ui.add_field('Status Rotator', status_rotator)
-ui.add_field('Server Info', server_info)
-ui.add_field('Webhook Info', webhook_info)
-ui.add_field('Webhook Spammer', webhook_spammer)
-ui.add_field('Scrapper Proxy', scrapper_proxy)
-ui.add_field('Email Info', email_info)
-ui.add_field('Instagram User Info', instagram_user_info)
-ui.add_field('Number Info', number_info)
-ui.add_field('Auto Login', auto_login)
-ui.add_field('Token Generator', token_generator)
-ui.add_field('Website Info', website_info)
-ui.add_field('Token Massdm', execute_mass_dm)
-ui.add_field('Discord Massreport', lambda: os.system('python utils/discord_massreport.py'))
-ui.add_field('Quit', exit)
 
+def discord_bot_server_nuker():
+    clear_screen()
+    nuke_server()
+    input("\nPress Enter to return to the menu...")
+
+console = Console()
+
+# Function to clear the screen
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+# Function to get the computer's name
+def get_pc_name():
+    return socket.gethostname()
+
+# Stylized prompt for user input
+def prompt_input(prompt_message):
+    pc_name = get_pc_name()
+    return input(f"{Colors.green}╭─── {pc_name}@FlexiTool\n{Colors.gray}│\n{Colors.green}╰─$ {prompt_message}{Colors.white}")
+
+
+
+
+# Function to display the menu
+def display_menu():
+    logo = r"""
+███████╗██╗     ███████╗██╗  ██╗██╗        ████████╗ ██████╗  ██████╗ ██╗     
+██╔════╝██║     ██╔════╝╚██╗██╔╝██║        ╚══██╔══╝██╔═══██╗██╔═══██╗██║     
+█████╗  ██║     █████╗   ╚███╔╝ ██║           ██║   ██║   ██║██║   ██║██║     
+██╔══╝  ██║     ██╔══╝   ██╔██╗ ██║           ██║   ██║   ██║██║   ██║██║     
+██║     ███████╗███████╗██╔╝ ██╗██║           ██║   ╚██████╔╝╚██████╔╝███████╗
+╚═╝     ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝           ╚═╝    ╚═════╝  ╚═════╝ ╚══════╝                                               
+    """
+    console.print(logo, style="bold green")  # Print the logo in green and left-aligned
+
+
+    menu = """
+
+    [I] Info                 github.com/FlexiTool/FlexiTool
+    [S] Site
+    Main Functions                   
+    ──────────────────────────────────────────────────────
+    [1] IP Info                     [2] Token Decrypt
+    [3] Token Checker               [4] Token Info                  
+    [5] Badge Changer               [6] Status Rotator                         
+    [7] Server Info                 [8] Webhook Info              
+    [9] Webhook Spammer             [10] Scrapper Proxy             
+    [11] Email Info                 [12] Instagram User Info                     
+    [13] Number Info                [14] Auto Login                         
+    [15] Token Generator            [16] Website Info                        
+    [17] Token Massdm               [18] Email Tracker                        
+    [19] Discord Bot Server Nuker   [20] Quit                      
+
+    """
+
+    clear_screen()  # Clean the screen before displaying the menu
+    console.print(logo, style="bold green")  # Display the logo in green
+    console.print(menu, style="bold white")
+
+    choice = prompt_input("Choose an option: ").lower()
+    
+    if choice == "i":
+        print("Information about the tool: By Kazzou")
+        input("\nPress Enter to return to the menu...")
+    elif choice == "s":
+        print("Visit the website: https://github.com/FlexiTool/FlexiTool")
+        input("\nPress Enter to return to the menu...")
+    elif choice in map(str, range(1, 21)):
+        main_menu_options[int(choice)]()
+    else:
+        print(f"{Colors.red}Invalid option! Please try again.{Colors.white}")
+        time.sleep(1)
+
+# Mapping of main menu choices to corresponding functions
+main_menu_options = {
+    1: ip_info,
+    2: token_decrypt,
+    3: token_checker_main,
+    4: token_info,
+    5: badge_changer,
+    6: status_rotator,
+    7: server_info,
+    8: webhook_info,
+    9: webhook_spammer,
+    10: scrapper_proxy,
+    11: email_info,
+    12: instagram_user_info,
+    13: number_info,
+    14: auto_login,
+    15: token_generator,
+    16: website_info,
+    17: execute_mass_dm,
+    18: email_tracker,
+    19: discord_bot_server_nuker,
+    20: sys.exit,
+}
+
+# Main function
 def main():
+    setup()
+    launch_animation()  # Run the color-changing animation at launch
     while True:
-        ui.menu()
+        display_menu()
 
 if __name__ == "__main__":
     main()

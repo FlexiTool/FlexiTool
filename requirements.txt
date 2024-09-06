@@ -9,3 +9,4 @@ httpx
 datetime
 colorama
 pyfiglet
+rich
